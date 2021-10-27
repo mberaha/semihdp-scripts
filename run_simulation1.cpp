@@ -1,12 +1,13 @@
 // This scripts runs the simulations with two populations (Section 6.1)
 
+#include <src/algorithms/neal2_algorithm.h>
+#include <src/algorithms/semihdp_sampler.h>
+#include <src/collectors/file_collector.h>
+#include <src/collectors/memory_collector.h>
+#include <src/includes.h>
+#include <src/utils/rng.h>
+
 #include <Eigen/Dense>
-#include <src/algorithms/neal2_algorithm.hpp>
-#include <src/algorithms/semihdp_sampler.hpp>
-#include <src/collectors/file_collector.hpp>
-#include <src/collectors/memory_collector.hpp>
-#include <src/includes.hpp>
-#include <src/utils/rng.hpp>
 #include <stan/math/prim.hpp>
 #include <vector>
 
@@ -40,8 +41,6 @@ std::vector<MatrixXd> simulate_data(double m1, double s1, double m2, double s2,
   return out;
 }
 
-
-
 int main() {
   // Scenario I
   std::vector<MatrixXd> data1 = simulate_data(0.0, 1.0, 5.0, 1.0, 0.5, 0.0,
@@ -57,8 +56,13 @@ int main() {
 
   // data1[1] = data1[0];
 
-  run_semihdp(data1, "s1e1.recordio");
-  run_semihdp(data2, "s1e1.recordio");
-  run_semihdp(data3, "s1e1.recordio");
-
+  run_semihdp(data1,
+              "/home/mario/PhD/exchangeability/semihdp-scripts/"
+              "new_chains/s1e1_v2.recordio");
+  run_semihdp(data2,
+              "/home/mario/PhD/exchangeability/semihdp-scripts/"
+              "new_chains/s1e2_v2.recordio");
+  run_semihdp(data3,
+              "/home/mario/PhD/exchangeability/semihdp-scripts/"
+              "new_chains/s1e3_v2.recordio");
 }

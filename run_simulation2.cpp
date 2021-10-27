@@ -1,13 +1,14 @@
 // This scripts runs the simulations with four populations (Section 6.1)
 
+#include <src/algorithms/neal2_algorithm.h>
+#include <src/algorithms/semihdp_sampler.h>
+#include <src/collectors/file_collector.h>
+#include <src/collectors/memory_collector.h>
+#include <src/includes.h>
+#include <src/utils/rng.h>
+
 #include <Eigen/Dense>
 #include <chrono>
-#include <src/algorithms/neal2_algorithm.hpp>
-#include <src/algorithms/semihdp_sampler.hpp>
-#include <src/collectors/file_collector.hpp>
-#include <src/collectors/memory_collector.hpp>
-#include <src/includes.hpp>
-#include <src/utils/rng.hpp>
 #include <stan/math/prim.hpp>
 #include <vector>
 
@@ -27,44 +28,71 @@ MatrixXd generate_mixture(double m1, double s1, double m2, double s2, double w,
   return out;
 }
 
-void run_semihdp(const std::vector<MatrixXd> data, std::string chainfile,
-                 std::string update_c = "full") {
+void run_semihdp2(const std::vector<MatrixXd> data, std::string chainfile,
+                  std::string update_c = "full") {
+  // compute overall mean
+  double mu0 = std::accumulate(
+      data.begin(), data.end(), 0,
+      [&](int curr, const MatrixXd dat) { return curr + dat.sum(); });
+  mu0 /= std::accumulate(
+      data.begin(), data.end(), 0.0,
+      [&](int curr, const MatrixXd dat) { return curr + dat.rows(); });
+  auto hier = std::make_shared<NNIGHierarchy>();
+  bayesmix::NNIGPrior hier_prior;
+  hier_prior.mutable_fixed_values()->set_mean(mu0);
+  hier_prior.mutable_fixed_values()->set_var_scaling(0.1);
+  hier_prior.mutable_fixed_values()->set_shape(2.0);
+  hier_prior.mutable_fixed_values()->set_scale(2.0);
+  hier->get_mutable_prior()->CopyFrom(hier_prior);
+  hier->initialize();
+
   // Collect pseudo priors
-  std::vector<MemoryCollector<bayesmix::MarginalState>> pseudoprior_collectors;
+  std::vector<MemoryCollector> pseudoprior_collectors;
   pseudoprior_collectors.resize(data.size());
   bayesmix::DPPrior mix_prior;
   double totalmass = 1.0;
-  mix_prior.mutable_fixed_value()->set_value(totalmass);
+  mix_prior.mutable_fixed_value()->set_totalmass(totalmass);
   for (int i = 0; i < data.size(); i++) {
     auto mixing = std::make_shared<DirichletMixing>();
-    mixing->set_prior(mix_prior);
+    mixing->get_mutable_prior()->CopyFrom(mix_prior);
+    mixing->set_num_components(5);
     auto hier = std::make_shared<NNIGHierarchy>();
-    hier->set_mu0(data[i].mean());
-    hier->set_lambda0(0.1);
-    hier->set_alpha0(2.0);
-    hier->set_beta0(2.0);
+    bayesmix::NNIGPrior hier_prior;
+    hier_prior.mutable_fixed_values()->set_mean(data[i].mean());
+    hier_prior.mutable_fixed_values()->set_var_scaling(0.1);
+    hier_prior.mutable_fixed_values()->set_shape(2.0);
+    hier_prior.mutable_fixed_values()->set_scale(2.0);
+    hier->get_mutable_prior()->CopyFrom(hier_prior);
 
     Neal2Algorithm sampler;
     sampler.set_maxiter(2000);
     sampler.set_burnin(1000);
     sampler.set_mixing(mixing);
-    sampler.set_data_and_initial_clusters(data[i], hier, 5);
-    sampler.run(&pseudoprior_collectors[i]);
+    sampler.set_data(data[i]);
+    sampler.set_hierarchy(hier);
+    sampler.run(&pseudoprior_collectors[i], false);
   }
 
   auto start = std::chrono::high_resolution_clock::now();
-  int nburn = 10000;
-  int niter = 10000;
-  MemoryCollector<bayesmix::SemiHdpState> collector;
-  SemiHdpSampler sampler(data, update_c);
-  sampler.initialize();
-  sampler.check();
-  sampler.run(nburn, nburn, niter, 5, &collector, pseudoprior_collectors);
-  collector.write_to_file(chainfile);
+  int nadapt = 10000;
+  int nburn = 5000;
+  int niter = 5000;
+  MemoryCollector collector;
+
+  bayesmix::SemiHdpParams params;
+  bayesmix::read_proto_from_file(
+      "/home/mario/dev/bayesmix/resources/semihdp_params.asciipb", &params);
+  params.set_rest_allocs_update(update_c);
+
+  SemiHdpSampler sampler(data, hier, params);
+  sampler.run(nadapt, nburn, niter, 5, &collector, pseudoprior_collectors,
+              true, 200);
   auto end = std::chrono::high_resolution_clock::now();
   auto duration =
       std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
   std::cout << "Finished running, duration: " << duration << std::endl;
+
+  collector.write_to_file<bayesmix::SemiHdpState>(chainfile);
 }
 
 int main() {
@@ -92,11 +120,17 @@ int main() {
   std::cout << data1[3].transpose() << std::endl;
 
   std::cout << "Data1 OK" << std::endl;
-  run_semihdp(data1, "/home/mario/dev/bayesmix/s2e1_full.recordio");
-  run_semihdp(data1, "/home/mario/dev/bayesmix/s2e1_metro_base.recordio",
-              "metro_base");
-  run_semihdp(data1, "/home/mario/dev/bayesmix/s2e1_metro_dist.recordio",
-              "metro_dist");
+  run_semihdp2(data1,
+               "/home/mario/PhD/exchangeability/semihdp-scripts/"
+               "new_chains/s2e1_fullv2.recordio");
+  // run_semihdp2(data1,
+  //              "/home/mario/PhD/exchangeability/semihdp-scripts/"
+  //              "new_chains/s2e1_metro_basev2.recordio",
+  //              "metro_base");
+  // run_semihdp2(data1,
+  //              "/home/mario/PhD/exchangeability/semihdp-scripts/"
+  //              "new_chains/s2e1_metro_distv2.recordio",
+  //              "metro_dist");
 
   // // Scenario V
   // auto& rng = bayesmix::Rng::Instance().get();
@@ -113,7 +147,9 @@ int main() {
   // }
 
   // std::cout << "Data2 OK" << std::endl;
-  // run_semihdp(data2, "/home/mario/dev/bayesmix/s2e2.recordio");
+  // run_semihdp2(data2,
+  //              "/home/mario/PhD/exchangeability/semihdp-scripts/"
+  //              "new_chains/s2e2.recordio");
 
   // // // Scenario VI
   // std::vector<MatrixXd> data3(4);
@@ -124,5 +160,7 @@ int main() {
 
   // std::cout << "Data3 OK" << std::endl;
 
-  // run_semihdp(data3, "/home/mario/dev/bayesmix/s2e3.recordio");
+  // run_semihdp2(data3,
+  //              "/home/mario/PhD/exchangeability/semihdp-scripts/"
+  //              "new_chains/s2e3.recordio");
 }
