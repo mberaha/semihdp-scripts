@@ -1,0 +1,18 @@
+pseudo_prior {
+  card_weight: 0.5
+  mean_perturb_sd: 1.5
+  var_perturb_frac: 2
+}
+
+dirichlet_concentration: 0.1
+
+rest_allocs_update: "full"
+
+totalmass_rest: 0.1
+
+totalmass_hdp: 0.1
+
+w_prior {
+  shape1: 2
+  shape2: 2
+}
