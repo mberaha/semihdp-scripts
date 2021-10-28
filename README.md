@@ -6,11 +6,11 @@ C++ scripts for reproducing the numerical results of the paper
 
 ### Installation
 
-1) Install the `bayesmix` library: clone the Github repo https://github.com/bayesmix-dev/bayesmix in your favorite directory
+1) Install the `bayesmix` library: clone (my fork of) the Github repo https://github.com/bayesmix-dev/bayesmix in your favorite directory
 ```shell
 mkdir my_fav_directory
 cd my_fav_directory
-git clone --recurse-submodules https://github.com/bayesmix-dev/bayesmix.git
+git clone --recurse-submodules git@github.com:mberaha/bayesmix.git
 ```
 Install the dependencies
 ```shell
