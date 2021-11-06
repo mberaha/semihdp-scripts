@@ -14,7 +14,17 @@
 
 using namespace Eigen;
 
-void run_semihdp(const std::vector<Eigen::MatrixXd> data,
-                 std::string chainfile, std::string update_c = "full");
+MemoryCollector run_semihdp(const std::vector<Eigen::MatrixXd> data,
+                 std::string chainfile,
+                 std::string params_file, 
+                 int niter=10000, int nburn=10000, int thin=10,
+                 std::string update_c = "full");
+
+
+std::vector<Eigen::MatrixXd> eval_uni_dens(
+    MemoryCollector& coll, const Eigen::VectorXd &xgrid, int ngroups);
+
+Eigen::MatrixXd get_latent_vars(
+    MemoryCollector& coll, int ngroups);
 
 #endif

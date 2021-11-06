@@ -58,11 +58,14 @@ int main() {
 
   run_semihdp(data1,
               "/home/mario/PhD/exchangeability/semihdp-scripts/"
-              "new_chains/s1e1_v2.recordio");
+              "new_chains/s1e1_v2.recordio",
+              "/Users/marioberaha/research/bnp/semihdp/semihdp-scripts/semihdp_params.asciipb");
   run_semihdp(data2,
               "/home/mario/PhD/exchangeability/semihdp-scripts/"
-              "new_chains/s1e2_v2.recordio");
+              "new_chains/s1e2_v2.recordio",
+              "/Users/marioberaha/research/bnp/semihdp/semihdp-scripts/semihdp_params.asciipb");
   run_semihdp(data3,
               "/home/mario/PhD/exchangeability/semihdp-scripts/"
-              "new_chains/s1e3_v2.recordio");
+              "new_chains/s1e3_v2.recordio",
+              "/Users/marioberaha/research/bnp/semihdp/semihdp-scripts/semihdp_params.asciipb");
 }
