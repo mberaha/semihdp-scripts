@@ -23,7 +23,13 @@ make run_from_file
 
 From the root of the directory you can call
 ```
-./build/run_from_file DATASET_FILE.csv semihdp_params.asciipb CHAINS_FILE.recordio LATENT_VARS_FILE.csv DENSITY_GRID.csv PATH_TO_OUTPUT_DENSITIES
+./build/run_from_file \
+  DATASET_FILE.csv \
+  semihdp_params.asciipb \
+  CHAINS_FILE.recordio \
+  LATENT_VARS_FILE.csv \
+  DENSITY_GRID.csv \
+  PATH_TO_OUTPUT_DENSITIES
 ```
 where
 
@@ -37,6 +43,12 @@ where
 For instance, to run the semihdp on the dataset in `example/data.csv` and evaluating the density on the grid `example/xgrid.csv`:
 
 ```
-./build/run_from_file example/data.csv semihdp_params.asciipb example/chains.recordio example/latent_vars.csv example/xgrid.csv example/dens
+./build/run_from_file \
+  example/data.csv \
+  semihdp_params.asciipb \
+  example/chains.recordio \
+  example/latent_vars.csv \
+  example/xgrid.csv \
+  example/dens
 ```
 
