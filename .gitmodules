@@ -1,0 +1,3 @@
+[submodule "lib/bayesmix"]
+	path = lib/bayesmix
+	url = git@github.com:mberaha/bayesmix.git
