@@ -61,13 +61,11 @@ MemoryCollector run_semihdp(const std::vector<MatrixXd> data,
   MemoryCollector shdp_collector;
   bayesmix::SemiHdpParams params;
   bayesmix::read_proto_from_file(params_file, &params);
-  std::cout << params.DebugString() << std::endl;
   params.set_rest_allocs_update(update_c);
 
   SemiHdpSampler sampler(data, hier, params);
   sampler.run(1000, nburn, niter, thin, &shdp_collector, 
               pseudoprior_collectors, true, 200);
-  sampler.print_debug_string();
   shdp_collector.write_to_file<bayesmix::SemiHdpState>(chainfile);
   return shdp_collector;
 }
@@ -132,4 +130,15 @@ Eigen::MatrixXd get_latent_vars(
         }
     }
     return bayesmix::stack_vectors(latent_vars);
+}
+
+Eigen::MatrixXi get_rest_allocs(MemoryCollector& coll, int ngroups) {
+    Eigen::MatrixXi out(coll.get_size(), ngroups);
+    for (int i=0; i < coll.get_size(); i++) {
+        bayesmix::SemiHdpState state;
+        coll.get_state(i, &state);
+        std::vector<int> v(state.c().begin(), state.c().end());
+        out.row(i) = Eigen::Map<Eigen::VectorXi>(&v[0], v.size());
+    }
+    return out;
 }

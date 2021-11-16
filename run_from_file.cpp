@@ -51,25 +51,27 @@ int main(int argc, char *argv[]) {
     std::string data_file = argv[1];
     std::string params_file = argv[2];
     std::string output_chains_file = argv[3];
-    std::string output_latent_vars_file = argv[4];
-    std::string dens_grid_file = argv[5];
-    std::string output_dens_path = argv[6];
-
-    int niter = 10000;
-    int nburn = 10000;
-    int thin = 5;
-    std::string update_c = "full";
+    std::string output_rest_file = argv[4];
+    std::string output_latent_vars_file = argv[5];
+    std::string dens_grid_file = argv[6];
+    std::string output_dens_path = argv[7];
+    int niter = std::stoi(argv[8]);
+    int nburn = std::stoi(argv[9]);
+    int thin = std::stoi(argv[10]);
+    std::string update_c = argv[11];
 
     std::vector<MatrixXd> data = read_data(data_file);
     Eigen::MatrixXd dens_grid = load_csv<Eigen::MatrixXd>(dens_grid_file);
-    std::cout << "dens_grid: " << dens_grid.transpose() << std::endl;
-
     MemoryCollector chains;    
     chains = run_semihdp(data, output_chains_file, params_file,
                          niter, nburn, thin, update_c);
 
-    std::cout << "chains_size: " << chains.get_size() << std::endl;
-
+    Eigen::MatrixXi rest_allocs = get_rest_allocs(chains, data.size());
+    const static Eigen::IOFormat CSVFormat(
+        Eigen::StreamPrecision, Eigen::DontAlignCols, ",", "\n");
+    std::ofstream file(output_rest_file.c_str());
+    file << rest_allocs.format(CSVFormat);
+    
     std::vector<MatrixXd> densities = eval_uni_dens(chains, dens_grid, data.size());
     for (int i = 0; i < densities.size(); i++) {
         std::string dens_file = output_dens_path + "/group_" +

@@ -24,7 +24,8 @@ MemoryCollector run_semihdp(const std::vector<Eigen::MatrixXd> data,
 std::vector<Eigen::MatrixXd> eval_uni_dens(
     MemoryCollector& coll, const Eigen::VectorXd &xgrid, int ngroups);
 
-Eigen::MatrixXd get_latent_vars(
-    MemoryCollector& coll, int ngroups);
+Eigen::MatrixXd get_latent_vars(MemoryCollector& coll, int ngroups);
+
+Eigen::MatrixXi get_rest_allocs(MemoryCollector& coll, int ngroups);
 
 #endif
