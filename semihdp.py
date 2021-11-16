@@ -60,7 +60,7 @@ def run_mcmc(data: list, dens_grid: np.array, niter=1000, nburn=1000, thin=10, u
     -------
     rest_allocs: np.array, of dimension [num_iter, num_groups]
         The parameters c_i's for each iteration
-    latent_vars: np.array, of dimension [num_data, 4] the colums are
+    latent_vars: np.array, of dimension [num_iter, 4] the colums are
         group_id, datum_id, mean (resp. variance) of the latent variable 
         associated to the observation
     log_dens: list of np.arrays, each entry is the evaluation of log_density of 
@@ -70,7 +70,7 @@ def run_mcmc(data: list, dens_grid: np.array, niter=1000, nburn=1000, thin=10, u
     ngroups = len(data)
     data_ = np.vstack([
         np.column_stack([np.ones_like(x) * i, x]) for i, x in enumerate(data)])
-    with TemporaryDirectory(prefix=HOME_DIR+"/") as tmpdir:
+    with TemporaryDirectory(prefix=SEMIHDP_HOME_DIR+"/") as tmpdir:
         data_path = os.path.join(tmpdir, 'data.txt')
         np.savetxt(data_path, data_, delimiter=",")
         grid_path = os.path.join(tmpdir, 'grid.txt')
