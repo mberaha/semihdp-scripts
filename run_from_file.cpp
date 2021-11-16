@@ -24,7 +24,8 @@ M load_csv (const std::string & path) {
         }
         ++rows;
     }
-    return Map<const Matrix<typename M::Scalar, M::RowsAtCompileTime, M::ColsAtCompileTime, RowMajor>>(values.data(), rows, values.size()/rows);
+    return Map<const Matrix<typename M::Scalar, M::RowsAtCompileTime, M::ColsAtCompileTime, RowMajor>>
+        (values.data(), rows, values.size()/rows);
 }
 
 std::vector<MatrixXd> read_data(std::string filename) {

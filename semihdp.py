@@ -2,14 +2,12 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import subprocess
-import glob
-
 from tempfile import TemporaryDirectory
 
-HOME_DIR = os.path.dirname(os.path.realpath(__file__))
-SEMIHDP_EXEC =  os.path.join(HOME_DIR, 'build/run_from_file')
+SEMIHDP_HOME_DIR = os.path.dirname(os.path.realpath(__file__))
+SEMIHDP_EXEC =  os.path.join(SEMIHDP_HOME_DIR, 'build/run_from_file')
 BASE_CMD = SEMIHDP_EXEC + ' ' + "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}"
-PARAMS_FILE = os.path.join(HOME_DIR, 'semihdp_params.asciipb')
+PARAMS_FILE = os.path.join(SEMIHDP_HOME_DIR, 'semihdp_params.asciipb')
 
 
 def run_mcmc_from_files(data_path, dens_grid_path, output_path, 
@@ -25,7 +23,7 @@ def run_mcmc_from_files(data_path, dens_grid_path, output_path,
             dens_path, niter, nburn, thin, update_c)
         
     cmd = cmd.split(" ")
-    subprocess.call(cmd, cwd=HOME_DIR)
+    subprocess.call(cmd, cwd=SEMIHDP_HOME_DIR)
     return  
 
 
