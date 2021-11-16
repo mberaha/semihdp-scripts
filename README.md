@@ -52,3 +52,9 @@ For instance, to run the semihdp on the dataset in `example/data.csv` and evalua
   example/dens
 ```
 
+## Python Interface
+
+You can use the `semihdp.py` file for a simple Python interface that hides the terminal from you.
+You can move the file anywhere on your machine as long as you modify the definition of 
+`SEMIHDP_HOME_DIR` to point to the right directory (at the moment, it points to the same path where 
+the file `semidhp.py` is, if you move the file, it should point to the path where this README is).
