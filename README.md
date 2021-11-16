@@ -6,41 +6,49 @@ C++ scripts for reproducing the numerical results of the paper
 
 ### Installation
 
-1) Install the `bayesmix` library: clone (my fork of) the Github repo https://github.com/bayesmix-dev/bayesmix in your favorite directory
-```shell
-mkdir my_fav_directory
-cd my_fav_directory
-git clone --recurse-submodules git@github.com:mberaha/bayesmix.git
+1. Clone this repo with its submodules
 ```
-Install the dependencies
-```shell
-cd bayesmix
-python3 build_tbb.py
+git clone --recurse-submodules  https://github.com/mberaha/semihdp-scripts.git 
 ```
 
-2) create a subdirectory `scripts` and clone this repo there
-```shell
-mkdir scripts
-cd scripts
-git clone git@github.com:mberaha/semihdp-scripts.git .
+2. Build the executable
 ```
-
-3) At the end of the "root" CMakeLists.txt file of bayesmix (located in bayesmix/CMakeLists.txt) add
-the following line
-```
-add_subdirectory(scripts)
-```
-
-4) Now it's time to build! From the main `bayesmix` directory:
-```shell
 mkdir build
-cd buid
+cd build
 cmake ..
-make simu1
+make run_from_file
 ```
-whill build the executable to run the first simulation. Other executables are `simu2` and `simu_many`.
 
-5) Run the executable:
-```shell
-./simu1
+### Running on your dataset
+
+From the root of the directory you can call
 ```
+./build/run_from_file \
+  DATASET_FILE.csv \
+  semihdp_params.asciipb \
+  CHAINS_FILE.recordio \
+  LATENT_VARS_FILE.csv \
+  DENSITY_GRID.csv \
+  PATH_TO_OUTPUT_DENSITIES
+```
+where
+
+1. `DATASET_FILE.csv` is the path to a csv file with two columns: the group id and the observation (no header)
+2. `semihdp_params.asciipb` contains all the prior hyperparameters, it is in the root folder of the repo
+3. `CHAINS_FILE.recordio` is where the MCMC chains will be stored (as a sequence of serialized protocol buffers)
+4. `LATENT_VARS_FILE.csv`is where the latent variables associated to each observation will be saved, useful to identify the clusters. This will be a csv file with four columns: [iteration_number, group_id, mean, var]
+5. `DENSITY_GRID.csv`is a csv file with the grid over which to evaluate the (log) density. This is common for all the groups
+6. `PATH_TO_OUTPUT_DENSITIES` is a path where one csv file for each group will be created. Each file will store the mixture density evaluated on the grid at each iteration of the MCMC chain (by row).
+
+For instance, to run the semihdp on the dataset in `example/data.csv` and evaluating the density on the grid `example/xgrid.csv`:
+
+```
+./build/run_from_file \
+  example/data.csv \
+  semihdp_params.asciipb \
+  example/chains.recordio \
+  example/latent_vars.csv \
+  example/xgrid.csv \
+  example/dens
+```
+
