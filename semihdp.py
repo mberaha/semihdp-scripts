@@ -6,11 +6,11 @@ from tempfile import TemporaryDirectory
 
 SEMIHDP_HOME_DIR = os.path.dirname(os.path.realpath(__file__))
 SEMIHDP_EXEC =  os.path.join(SEMIHDP_HOME_DIR, 'build/run_from_file')
-BASE_CMD = SEMIHDP_EXEC + ' ' + "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}"
+BASE_CMD = SEMIHDP_EXEC + ' ' + "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}"
 PARAMS_FILE = os.path.join(SEMIHDP_HOME_DIR, 'semihdp_params.asciipb')
 
 
-def run_mcmc_from_files(data_path, dens_grid_path, output_path, 
+def run_mcmc_from_files(data_path, dens_grid_path, output_path, seed,
                         niter, nburn, thin, update_c="full"):
     chainfile = os.path.join(output_path, "chains.recordio")
     c_file = os.path.join(output_path, "c.txt")
@@ -20,7 +20,7 @@ def run_mcmc_from_files(data_path, dens_grid_path, output_path,
     cmd = BASE_CMD.format(
             data_path, PARAMS_FILE, chainfile, c_file,
             latent_vars_file, dens_grid_path, 
-            dens_path, niter, nburn, thin, update_c)
+            dens_path, seed, niter, nburn, thin, update_c)
         
     cmd = cmd.split(" ")
     subprocess.call(cmd, cwd=SEMIHDP_HOME_DIR)
@@ -41,13 +41,15 @@ def load_output(output_path, ngroups):
     return c, latent_vars, log_dens                
 
 
-def run_mcmc(data: list, dens_grid: np.array, niter=1000, nburn=1000, thin=10, update_c="full"):
+def run_mcmc(data: list, dens_grid: np.array, seed: int,
+             niter=1000, nburn=1000, thin=10, update_c="full"):
     """
     Runs the semihpd sampler by calling the executable from a subprocess.
     Arguments
     ---------
     data: list of np.arrays, each entry is the data in one of the groups
     dens_grid: np.array, the grid on which to evaluate the density of all the groups
+    seed: int, the seed for the random number generator
     niter: int, number of iterations to run the sampler
     nburn: int, number of burn-in iterations 
     thin: int, thinning factor
@@ -83,10 +85,11 @@ def run_mcmc(data: list, dens_grid: np.array, niter=1000, nburn=1000, thin=10, u
 
         
 if __name__ == "__main__":
+    seed = 132312
     data = [np.random.normal(0, 1, size=100),
             np.random.normal(0, 1, size=100)]
     dens_grid = np.linspace(-5, 5, 100)
-    c, latent_vars, log_dens = run_mcmc(data, dens_grid)
+    c, latent_vars, log_dens = run_mcmc(data, dens_grid, seed)
     plt.plot(dens_grid, np.exp(np.mean(log_dens[0], axis=0)))
     plt.show()
 

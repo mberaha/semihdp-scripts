@@ -60,6 +60,10 @@ int main(int argc, char *argv[]) {
     int nburn = std::stoi(argv[9]);
     int thin = std::stoi(argv[10]);
     std::string update_c = argv[11];
+    int seed = std::stoi(argv[12]);
+
+    auto &rng = bayesmix::Rng::Instance().get();
+    rng.seed(seed);
 
     std::vector<MatrixXd> data = read_data(data_file);
     Eigen::MatrixXd dens_grid = load_csv<Eigen::MatrixXd>(dens_grid_file);
